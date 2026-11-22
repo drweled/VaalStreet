@@ -1,0 +1,32 @@
+[package]
+name = "vaalstreet"
+version = "1.0.0"
+description = "Vaal Street: your Path of Exile stash's worth, graph and run profits"
+authors = ["Waleed"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png"] }
+# Ctrl+W (only while the game or Vaal Street is in front)
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-single-instance = "2"
+# updates from the GitHub releases
+tauri-plugin-updater = "2"
+reqwest = { version = "0.12", default-features = false, features = ["json", "gzip", "rustls-tls", "cookies"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["sync", "time"] }
+dirs = "6"
+# "Startup on/off" (the user's Run list)
+winreg = "0.55"
+# which window is in front (the game?)
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_Threading", "Win32_UI_WindowsAndMessaging"] }
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true

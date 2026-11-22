@@ -1,0 +1,75 @@
+{
+    "$schema":  "https://schema.tauri.app/config/2",
+    "productName":  "Vaal Street",
+    "mainBinaryName":  "VaalStreet",
+    "version":  "1.0.0",
+    "identifier":  "local.vaalstreet.app",
+    "build":  {
+                  "frontendDist":  "../ui"
+              },
+    "app":  {
+                "withGlobalTauri":  true,
+                "windows":  [
+                                {
+                                    "label":  "main",
+                                    "additionalBrowserArgs":  "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows",
+                                    "title":  "Vaal Street",
+                                    "url":  "vaal.html",
+                                    "width":  1380,
+                                    "height":  900,
+                                    "resizable":  true,
+                                    "skipTaskbar":  true,
+                                    "decorations":  false,
+                                    "shadow":  false,
+                                    "transparent":  true,
+                                    "alwaysOnTop":  true,
+                                    "visible":  false
+                                }
+                            ],
+                "security":  {
+                                 "csp":  "default-src \u0027self\u0027; style-src \u0027self\u0027 \u0027unsafe-inline\u0027; img-src \u0027self\u0027 data: https://web.poecdn.com; font-src \u0027self\u0027; connect-src \u0027self\u0027 ipc: http://ipc.localhost"
+                             }
+            },
+    "bundle":  {
+                   "active":  true,
+                   "targets":  [
+                                   "nsis"
+                               ],
+                   "publisher":  "Waleed",
+                   "category":  "Utility",
+                   "shortDescription":  "Vaal Street: your Path of Exile stash\u0027s worth",
+                   "longDescription":  "Your Path of Exile stash priced with poe.ninja, its worth over time, and how much each strategy run made.",
+                   "copyright":  " ",
+                   "icon":  [
+                                "icons/32x32.png",
+                                "icons/128x128.png",
+                                "icons/128x128@2x.png",
+                                "icons/icon.ico"
+                            ],
+                   "windows":  {
+                                   "nsis":  {
+                                                "installMode":  "currentUser",
+                                                "installerIcon":  "icons/icon.ico",
+                                                "languages":  [
+                                                                  "English"
+                                                              ],
+                                                "displayLanguageSelector":  false,
+                                                "headerImage":  "installer/header.bmp",
+                                                "sidebarImage":  "installer/sidebar.bmp",
+                                                "installerHooks":  "installer/hooks.nsh"
+                                            }
+                               },
+                   "createUpdaterArtifacts":  false
+               },
+    "plugins":  {
+                    "updater":  {
+                                    "pubkey":  "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDVEOUY3MzYzQ0I0QUJGMEEKUldRS3YwckxZM09mWFhYL2NvNVMrMlVuZjltTGpPRkVhOUNNNkE0R3ZmVDhEWmoxNWdZMlJYRTMK",
+                                    "endpoints":  [
+                                                      "https://github.com/drweled/VaalStreet/releases/latest/download/latest.json"
+                                                  ],
+                                    "windows":  {
+                                                    "installMode":  "passive"
+                                                }
+                                }
+                }
+}

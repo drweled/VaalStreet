@@ -1,0 +1,71 @@
+# Builds the Vaal Street installer from this repository's source, on GitHub's
+# own Windows machines, so anyone can check that a released setup is exactly
+# what this source produces.
+#
+# Runs on every version tag (v1.0.0, v1.0.1, …) and by hand (Actions tab →
+# "Build" → Run workflow). The installer, its updater signature and
+# latest.json are kept as the run's artifact.
+#
+# Update signing: the repository secret TAURI_SIGNING_PRIVATE_KEY holds the
+# maker's updater key. Without it the build still works (-NoUpdater): the
+# installer is fine, it just can't be offered to installed copies as an update.
+
+name: Build
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.vaalstreet-target/cargo
+          key: cargo-${{ hashFiles('src-tauri/Cargo.lock', 'setup/Cargo.lock') }}
+
+      - name: Tauri CLI
+        shell: pwsh
+        run: |
+          if (-not (Get-Command cargo-tauri -ErrorAction SilentlyContinue)) {
+            cargo install tauri-cli --version "^2" --locked
+          }
+
+      - name: Build
+        shell: pwsh
+        env:
+          UPDATER_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          if ($env:UPDATER_KEY) {
+            $dir = Join-Path $env:USERPROFILE '.vaalstreet-keys'
+            New-Item -ItemType Directory -Force $dir | Out-Null
+            Set-Content (Join-Path $dir 'vaalstreet-updater.key') $env:UPDATER_KEY -NoNewline
+            ./build.ps1 -Owner ${{ github.repository_owner }}
+          } else {
+            ./build.ps1 -NoUpdater
+          }
+
+      - name: Keep the installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: VaalStreet-installer
+          path: dist/*
+          if-no-files-found: error

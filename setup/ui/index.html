@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Vaal Street Setup</title>
+<style>
+@font-face { font-family: "VT323"; src: url("vt323.ttf") format("truetype"); }
+:root {
+  --font: "VT323", Consolas, monospace;
+  --text: "Segoe UI", system-ui, sans-serif;
+  --ink: #e8f1ff; --muted: #8fa3c4; --faint: #5d739c;
+  --cyan: #4de3ff; --pink: #ff5d8f; --gold: #ffd166; --good: #5cffb0;
+  --line: rgba(125, 147, 184, .5);
+  --field: rgba(2, 7, 18, .7);
+  --soft: rgba(77, 227, 255, .13); --glow: rgba(77, 227, 255, .45);
+  --top: #0a2a4d; --deep: #040a17;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: transparent; overflow: hidden; color: var(--ink); font-family: var(--text); user-select: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+[hidden] { display: none !important; }
+
+/* the card: deep water, a bright tick on each corner, CRT lines on top */
+.card {
+  position: absolute; inset: 10px; overflow: hidden;
+  border: 1px solid var(--line);
+  --t: var(--cyan);
+  background:
+    linear-gradient(var(--t), var(--t)) 0 0 / 14px 2px, linear-gradient(var(--t), var(--t)) 0 0 / 2px 14px,
+    linear-gradient(var(--t), var(--t)) 100% 0 / 14px 2px, linear-gradient(var(--t), var(--t)) 100% 0 / 2px 14px,
+    linear-gradient(var(--t), var(--t)) 0 100% / 14px 2px, linear-gradient(var(--t), var(--t)) 0 100% / 2px 14px,
+    linear-gradient(var(--t), var(--t)) 100% 100% / 14px 2px, linear-gradient(var(--t), var(--t)) 100% 100% / 2px 14px,
+    radial-gradient(ellipse at 50% -20%, rgba(150, 225, 255, .14), transparent 60%),
+    linear-gradient(180deg, var(--top), var(--deep));
+  background-repeat: no-repeat; background-origin: border-box;
+  box-shadow: 0 0 0 1px rgba(77, 227, 255, .45), 0 0 22px rgba(77, 227, 255, .18);
+  animation: pop .35s steps(5) both;
+}
+.card::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 20;
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px);
+}
+@keyframes pop { 0% { transform: scale(.92); opacity: 0; } 100% { transform: none; opacity: 1; } }
+
+/* rising pixel bubbles */
+.bubbles span {
+  position: absolute; bottom: -10px; width: 4px; height: 4px; background: rgba(150, 230, 255, .5);
+  animation: rise linear infinite;
+}
+@keyframes rise { to { transform: translateY(-420px); opacity: 0; } }
+
+.close {
+  position: absolute; top: 10px; right: 10px; z-index: 30; width: 28px; height: 28px;
+  display: grid; place-items: center; border: 1px solid var(--line); background: var(--field); color: var(--muted);
+  font-family: var(--font); font-size: 22px; line-height: 1;
+}
+.close:hover { color: var(--pink); border-color: var(--pink); box-shadow: 0 0 12px rgba(255, 93, 143, .3); }
+
+.page { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 26px 34px; text-align: center; z-index: 10; }
+.page[hidden] { display: none; }
+.page.in { animation: slide .4s steps(6) both; }
+@keyframes slide { 0% { transform: translateY(18px); opacity: 0; } 100% { transform: none; opacity: 1; } }
+
+/* the V, pixel for pixel, with a pink and a cyan fringe */
+.logo.sad { width: 76px; height: 76px; filter: grayscale(.55) drop-shadow(0 0 10px rgba(255, 93, 143, .4)); animation: shiver 2.8s steps(4) infinite; }
+@keyframes shiver { 0%, 80%, 100% { transform: none; } 84% { transform: translateX(-3px); } 88% { transform: translateX(3px); } 92% { transform: translateX(-2px); } }
+.logo { width: 92px; height: 92px; image-rendering: pixelated; filter: drop-shadow(0 0 12px rgba(77, 227, 255, .45)); animation: float 2.4s steps(6) infinite; }
+@keyframes float { 50% { transform: translateY(-6px); } }
+.word {
+  font-family: var(--font); -webkit-font-smoothing: none; font-size: 58px; line-height: .8; letter-spacing: .04em; white-space: nowrap;
+  text-shadow: -.055em .041em 0 var(--pink), .055em -.041em 0 rgba(77, 227, 255, .85), 0 0 .24em rgba(77, 227, 255, .35);
+  animation: flicker 5s step-end infinite;
+}
+.word.small { font-size: 44px; }
+@keyframes flicker { 0%, 93%, 95.5%, 100% { opacity: 1; } 93.6% { opacity: .7; } 94.4% { opacity: .94; } 95% { opacity: .62; } }
+.tag { font-family: var(--font); -webkit-font-smoothing: none; font-size: 19px; letter-spacing: .32em; color: var(--cyan); text-shadow: 0 0 12px rgba(77, 227, 255, .5); }
+.note { font-size: 13px; color: var(--muted); max-width: 400px; }
+.ver { font-family: var(--font); -webkit-font-smoothing: none; font-size: 22px; letter-spacing: .06em; display: flex; gap: 10px; align-items: baseline; }
+.ver .old { color: var(--muted); text-decoration: line-through; }
+.ver .to { color: var(--cyan); font-size: 15px; animation: blink 1s steps(2) infinite; }
+.ver b { color: var(--gold); font-weight: normal; text-shadow: 0 0 8px rgba(255, 209, 102, .6); }
+@keyframes blink { 50% { opacity: .2; } }
+
+.btns { display: flex; gap: 10px; margin-top: 4px; }
+.primary, .ghost { height: 40px; padding: 0 26px; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; }
+.primary {
+  border: 1px solid var(--cyan); background: var(--soft); color: var(--cyan); text-shadow: 0 0 8px var(--glow);
+  box-shadow: 0 0 16px var(--soft), inset 0 0 14px var(--soft); animation: pulse 2s steps(4) infinite;
+}
+.primary:hover { background: var(--cyan); color: #061226; text-shadow: none; }
+.primary:active, .ghost:active { transform: translateY(2px); }
+@keyframes pulse { 50% { box-shadow: 0 0 4px var(--soft), inset 0 0 6px var(--soft); } }
+.ghost { border: 1px solid var(--line); background: var(--field); color: var(--muted); font-weight: 500; }
+.ghost:hover { border-color: var(--cyan); color: var(--cyan); }
+.ghost.danger:hover { border-color: var(--pink); color: var(--pink); }
+.link { font-size: 12px; color: var(--faint); text-decoration: underline dotted; }
+.link:hover { color: var(--pink); }
+
+/* pixel tick box */
+.check { display: inline-flex; align-items: center; gap: 9px; font-size: 13px; color: var(--muted); cursor: pointer; }
+.check input { display: none; }
+.check i { width: 16px; height: 16px; border: 2px solid var(--line); background: var(--field); position: relative; }
+.check input:checked + i { border-color: var(--cyan); }
+.check input:checked + i::after { content: ""; position: absolute; inset: 2px; background: var(--cyan); box-shadow: 0 0 6px var(--glow); }
+
+/* working: the arrow keeps falling into the tray, 20 blocks light up */
+.art { position: relative; width: 70px; height: 90px; }
+.px { position: absolute; left: 0; top: 0; width: 10px; height: 10px; }
+.arrow { color: var(--ink); animation: fall .6s steps(4) infinite;
+  box-shadow: 30px 0 0 currentColor, 30px 10px 0 currentColor, 30px 20px 0 currentColor, 30px 30px 0 currentColor,
+    10px 40px 0 currentColor, 20px 40px 0 currentColor, 30px 40px 0 currentColor, 40px 40px 0 currentColor, 50px 40px 0 currentColor,
+    20px 50px 0 currentColor, 30px 50px 0 currentColor, 40px 50px 0 currentColor, 30px 60px 0 currentColor; }
+.arrow.up { animation-name: lift; color: var(--pink); }
+.tray { color: var(--gold); filter: drop-shadow(0 0 5px rgba(255, 209, 102, .7));
+  box-shadow: 0 70px 0 currentColor, 60px 70px 0 currentColor, 0 80px 0 currentColor, 10px 80px 0 currentColor, 20px 80px 0 currentColor,
+    30px 80px 0 currentColor, 40px 80px 0 currentColor, 50px 80px 0 currentColor, 60px 80px 0 currentColor; }
+@keyframes fall { 0% { transform: translateY(-30px); opacity: 0; } 25% { opacity: 1; } 100% { transform: translateY(8px); opacity: 1; } }
+@keyframes lift { 0% { transform: translateY(8px); opacity: 1; } 75% { opacity: 1; } 100% { transform: translateY(-30px); opacity: 0; } }
+.bar { display: grid; grid-template-columns: repeat(20, 1fr); gap: 3px; padding: 4px; width: 380px; border: 1px solid var(--line); background: var(--field); }
+.bar span { height: 16px; background: rgba(77, 227, 255, .1); }
+.bar span.on { background: var(--cyan); box-shadow: 0 0 6px var(--glow); }
+.bar span.head { background: var(--ink); }
+.pct { font-family: var(--font); -webkit-font-smoothing: none; font-size: 22px; letter-spacing: .1em; color: var(--cyan); min-height: 22px; }
+.status { font-family: var(--font); -webkit-font-smoothing: none; font-size: 19px; letter-spacing: .12em; color: var(--muted); }
+.status::after { content: "_"; animation: blink 1s steps(2) infinite; }
+
+/* done: a pixel tick drops in, with a burst of squares */
+.tick { position: relative; width: 70px; height: 60px; zoom: 1.3; animation: drop .5s steps(6) both; }
+.tick .px { color: var(--good); filter: drop-shadow(0 0 8px rgba(92, 255, 176, .6));
+  box-shadow: 0 30px 0 currentColor, 10px 40px 0 currentColor, 20px 50px 0 currentColor, 30px 40px 0 currentColor,
+    40px 30px 0 currentColor, 50px 20px 0 currentColor, 60px 10px 0 currentColor, 60px 0 0 currentColor, 10px 30px 0 currentColor, 20px 40px 0 currentColor; }
+.tick.bad .px { color: var(--pink); filter: drop-shadow(0 0 8px rgba(255, 93, 143, .6));
+  box-shadow: 0 0 0 currentColor, 10px 10px 0 currentColor, 20px 20px 0 currentColor, 30px 30px 0 currentColor, 40px 40px 0 currentColor, 50px 50px 0 currentColor,
+    50px 0 0 currentColor, 40px 10px 0 currentColor, 10px 40px 0 currentColor, 0 50px 0 currentColor; }
+@keyframes drop { 0% { transform: translateY(-40px) scale(.4); opacity: 0; } 70% { transform: translateY(4px) scale(1.1); opacity: 1; } 100% { transform: none; } }
+.burst span { position: absolute; left: 50%; top: 32%; width: 6px; height: 6px; background: var(--gold); animation: burst .7s steps(7) forwards; }
+@keyframes burst { 0% { transform: translate(0, 0); opacity: 1; } 100% { transform: translate(var(--x), var(--y)); opacity: 0; } }
+.err { font-size: 12px; color: var(--pink); max-width: 420px; word-break: break-word; }
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="bubbles" id="bubbles"></div>
+  <button class="close" id="close" title="Close">×</button>
+
+  <!-- welcome / reinstall / update -->
+  <section class="page" id="welcome" hidden>
+    <img class="logo" src="logo.png" alt="">
+    <div class="word">VAAL STREET</div>
+    <div class="tag">STASH · WORTH · LOOT</div>
+    <div class="ver" id="welcome-ver" hidden></div>
+    <div class="btns">
+      <button class="primary" id="install">▶ Install</button>
+    </div>
+    <label class="check"><input type="checkbox" id="shortcut" checked><i></i> Desktop shortcut</label>
+    <button class="link" id="to-uninstall" hidden>Uninstall Vaal Street</button>
+  </section>
+
+  <!-- uninstall: ask first -->
+  <section class="page" id="ask-remove" hidden>
+    <img class="logo sad" src="logo.png" alt="">
+    <div class="word small">UNINSTALL?</div>
+    <div class="note">Vaal Street will be removed from this PC.</div>
+    <label class="check"><input type="checkbox" id="wipe"><i></i> Also delete my wealth history and runs</label>
+    <div class="btns">
+      <button class="ghost danger" id="remove">✖ Uninstall</button>
+      <button class="ghost" id="back">Back</button>
+    </div>
+  </section>
+
+  <!-- working -->
+  <section class="page" id="work" hidden>
+    <div class="art"><span class="px arrow" id="work-arrow"></span><span class="px tray"></span></div>
+    <div class="word small" id="work-title">INSTALLING</div>
+    <div class="bar" id="bar"></div>
+    <div class="status" id="status">UNPACKING</div>
+  </section>
+
+  <!-- done / failed -->
+  <section class="page" id="done" hidden>
+    <div class="tick" id="tick"><span class="px"></span><div class="burst" id="burst"></div></div>
+    <div class="word small" id="done-title">READY</div>
+    <div class="note" id="done-note"></div>
+    <div class="err" id="done-err" hidden></div>
+    <div class="btns">
+      <button class="primary" id="launch">▶ Launch Vaal Street</button>
+      <button class="ghost" id="finish">Close</button>
+    </div>
+  </section>
+</div>
+
+<script>
+const T = window.__TAURI__
+const call = (cmd, args) => T.core.invoke(cmd, args)
+const $ = (id) => document.getElementById(id)
+
+// bubbles
+for (let i = 0; i < 14; i++) {
+  const b = document.createElement('span')
+  b.style.left = Math.round(Math.random() * 100) + '%'
+  b.style.animationDuration = (5 + Math.random() * 6).toFixed(1) + 's'
+  b.style.animationDelay = (-Math.random() * 8).toFixed(1) + 's'
+  b.style.animationTimingFunction = 'steps(' + (20 + Math.round(Math.random() * 20)) + ')'
+  if (Math.random() < .4) { b.style.width = b.style.height = '6px' }
+  $('bubbles').appendChild(b)
+}
+for (let i = 0; i < 20; i++) $('bar').appendChild(document.createElement('span'))
+
+function show (id) {
+  for (const p of document.querySelectorAll('.page')) { p.hidden = p.id !== id; p.classList.remove('in') }
+  void $(id).offsetWidth
+  $(id).classList.add('in')
+}
+
+// dragging the window by the card
+$('card').addEventListener('mousedown', (e) => {
+  if (e.button === 0 && !e.target.closest('button, label, input')) void call('setup_drag')
+})
+$('close').onclick = () => { if (!busy) void call('setup_quit') }
+window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !busy) void call('setup_quit') })
+
+// the progress bar: creeps forward while the installer works, fills when done
+let busy = false, cells = 0, timer = null
+function paint () {
+  const spans = $('bar').children
+  for (let i = 0; i < 20; i++) {
+    spans[i].className = i < cells ? 'on' : (i === cells && busy ? 'head' : '')
+  }
+}
+function startBar (steps) {
+  cells = 0; paint()
+  let n = 0
+  timer = setInterval(() => {
+    // fast at first, slower near the end (never full before it is done)
+    if (cells < 18 && Math.random() < (cells < 10 ? .9 : .45)) cells++
+    $('status').textContent = steps[Math.min(steps.length - 1, Math.floor(cells / (20 / steps.length)))]
+    paint(); n++
+  }, 180)
+}
+function finishBar () {
+  clearInterval(timer)
+  return new Promise((resolve) => {
+    const t = setInterval(() => {
+      if (cells < 20) { cells++; paint() } else { clearInterval(t); setTimeout(resolve, 250) }
+    }, 45)
+  })
+}
+function burst () {
+  const box = $('burst'); box.innerHTML = ''
+  for (let i = 0; i < 12; i++) {
+    const s = document.createElement('span'); const a = i / 12 * Math.PI * 2
+    s.style.setProperty('--x', Math.round(Math.cos(a) * 60) + 'px')
+    s.style.setProperty('--y', Math.round(Math.sin(a) * 46) + 'px')
+    s.style.background = ['var(--gold)', 'var(--cyan)', 'var(--pink)'][i % 3]
+    box.appendChild(s)
+  }
+}
+function done (ok, title, note, error, canLaunch) {
+  busy = false
+  $('tick').className = ok ? 'tick' : 'tick bad'
+  $('done-title').textContent = title
+  $('done-note').textContent = note
+  $('done-err').hidden = !error; $('done-err').textContent = error || ''
+  $('launch').hidden = !canLaunch
+  show('done')
+  if (ok) burst()
+}
+
+let info = null
+async function run (kind) {
+  busy = true
+  $('close').hidden = true
+  const update = kind === 'update'
+  $('work-arrow').className = kind === 'remove' ? 'px arrow up' : 'px arrow'
+  $('work-title').textContent = kind === 'remove' ? 'REMOVING' : update ? 'UPDATING' : 'INSTALLING'
+  show('work')
+  startBar(kind === 'remove' ? ['STOPPING', 'REMOVING FILES', 'CLEANING UP'] : ['UNPACKING', 'COPYING FILES', 'MAKING SHORTCUTS', 'ALMOST THERE'])
+  try {
+    if (kind === 'remove') await call('setup_uninstall', { wipe: $('wipe').checked })
+    else await call('setup_install', { shortcut: $('shortcut').checked })
+    await finishBar()
+    $('close').hidden = false
+    if (kind === 'remove') return done(true, 'REMOVED', 'Vaal Street is gone. Thanks for diving!', null, false)
+    if (info.updateMode) { await call('setup_launch'); return }
+    // started with --auto: done, close by itself
+    if (info.auto) setTimeout(() => void call('setup_quit'), 1800)
+    done(true, 'READY', 'Vaal Street waits next to the clock. In game, press Ctrl+W.', null, true)
+  } catch (e) {
+    clearInterval(timer)
+    $('close').hidden = false
+    done(false, 'SOMETHING BROKE', kind === 'remove' ? 'Vaal Street could not be removed.' : 'Vaal Street could not be installed.', String(e), false)
+  }
+}
+
+$('install').onclick = () => run(info.installed ? 'update' : 'install')
+$('to-uninstall').onclick = () => show('ask-remove')
+$('back').onclick = () => { if (info.uninstallMode) void call('setup_quit'); else show('welcome') }
+$('remove').onclick = () => run('remove')
+$('launch').onclick = () => void call('setup_launch')
+$('finish').onclick = () => void call('setup_quit')
+
+;(async () => {
+  info = await call('setup_info')
+  // started by Vaal Street's own updater (or with --auto): straight to work
+  if (info.updateMode) return run('update')
+  if (info.auto) return run(info.installed ? 'update' : 'install')
+  // the uninstaller (Settings > Apps > Uninstall): straight to the question
+  if (info.uninstallMode) {
+    $('back').textContent = 'Cancel'
+    return show('ask-remove')
+  }
+  if (info.installed) {
+    const same = info.installed === info.version
+    $('welcome-ver').hidden = false
+    $('welcome-ver').innerHTML = same
+      ? `<b>v${info.version}</b>`
+      : `<span class="old">v${info.installed}</span><span class="to">▶</span><b>v${info.version}</b>`
+    $('install').textContent = same ? '↻ Reinstall' : '▶ Update'
+    $('to-uninstall').hidden = false
+    // the shortcuts made the first time stay as they are
+    $('shortcut').closest('label').hidden = true
+  }
+  show('welcome')
+})()
+</script>
+</body>
+</html>

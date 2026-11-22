@@ -1,0 +1,14 @@
+# build output (top level only: app/src/web/ui is source code)
+/ui/
+/dist/
+/src-tauri/target/
+/src-tauri/gen/
+node_modules/
+
+# never publish signing keys
+*.key
+*.pem
+*.pfx
+/setup/gen/
+/setup/ui/vt323.ttf
+/setup/ui/logo.png

@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "The setup window talks only to the setup's own commands",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}
